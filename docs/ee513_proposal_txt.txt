@@ -1,0 +1,41 @@
+EE513 Project 3 Proposal
+Emmett Williamson
+
+Track: Track B, industrial inspection. I will build a system to flag
+defective metal nuts in photos, using examples of good parts. I would also 
+like to attempt to bridge this project with my STAT 671 class by using 
+a kernel method for scoring instead of the PatchCore 
+nearest-neighbor distance.
+
+Data: I plan to use the public MVTec AD metal_nut category: 220 good
+training images and 115 test images (22 good and 93 defective), with
+defect masks. Current download status: [confirm]. I will hold out 40 good
+training images for tuning. I also need to capture about 20 repeated
+photos of one nut with a checkerboard for scale.
+
+Baseline and comparison: The classical baseline will align each image to
+an average good image, identify differences, clean them up, and flag
+large connected regions. I will tune it on held-out good images.
+PatchCore will instead use a pretrained network to describe image patches
+and flag patches unlike those in a memory of good examples. A kernel
+method will use the same features to score average similarity to good
+patches, approximated with random Fourier features. This connects the
+project to STAT 671.
+
+Metrics: For each method, I will choose a threshold targeting a 5%
+false-positive rate on held-out good images. On separate test images, I
+will report false-positive and false-negative rates with 95% confidence
+intervals, and mark the operating point on an ROC curve. I will also
+measure the nut's width with sub-pixel edge fits and report the standard
+deviation across repeated photos as measurement uncertainty.
+
+Deployment: I will export the pretrained network and kernel scorer to
+ONNX and run them with onnxruntime on my laptop CPU at 256 x 256 pixels.
+I will report mean and spread of throughput over repeated runs after
+discarding the first run, and state the hardware used.
+
+Main risk: Scope and preparation.  Because I want to attempt to combine 
+projects, the singluar scope feels larger than what it should be, 
+but I'm also attempting to hit two birds with one stone.  
+Knowing that all of the work being done for the project will apply 
+to both classes gives me confidence that I'll be able to get it done.  

@@ -1,0 +1,63 @@
+Project 3: An Applied Imaging System
+In this project you will choose one of three tracks, write a one-page proposal, build it, evaluate it on real data, and package it so someone else can run it. The project duration is merely three weeks and finals week, so this will be an intense period of work. Submit a single PDF containing the report, the statement, and your repository URL.
+
+Choosing a track
+The material for Track A is covered in lecture 14, for Track B in lecture 16, and for Track C in lectures 10 through 12 and Exercise 7. Note that lecture 16 occurs after you start work on this project. If it changes your mind about Track B, please email me and I will switch you. Any time before the baseline milestone is fine.
+
+Choose based on the data you can actually obtain. The most common way this project goes wrong is spending a week trying to acquire data. If you cannot start working with your data this week, you should probably pick a different track.
+
+Track A, computational photography
+For this track you will build either a burst or HDR pipeline, or a deblurring pipeline, and evaluate it on captures that you take yourself.
+
+If you build a burst or HDR pipeline, you align the frames, merge them, and tone map the result so that it can be displayed. You already wrote burst alignment for Project 2, so the new work here is the merge and the tone mapping. For HDR you will need bracketed exposures, which means you must vary the shutter time rather than the ISO. Changing the ISO at a fixed shutter time scales the signal and the noise together, so it gives you no additional dynamic range.
+
+Raw values are proportional to light, so the merge is the weighted average described in lecture 14. You are encouraged to verify this on your own camera before you rely on it. Plot the signal against exposure time for a patch of the scene that never clips. The result should be a straight line through the origin. If it is not, your black level is probably wrong. Once you have the radiance map, tone map it both globally and locally and explain which one you would ship. If you would rather not build a radiance map at all, exposure fusion is a reasonable alternative.
+
+If you work with a burst rather than a bracket, the robust merge from lecture 14 is the interesting part. Averaging aligned frames gives you more light without more blur. The robust merge does this while still taking moving objects from the reference frame alone, so they do not smear.
+
+If you build a deblurring pipeline, you estimate the blur kernel, deconvolve it with the classical methods of lecture 13, and then run a learned deblurring model on the same frames so that you can compare the two. You need to capture your own motion blur, handheld, along with a tripod shot of the same scene to serve as the reference.
+
+The following are mistakes I made capturing these images myself, and you may be able to avoid them.
+
+Changing the exposure by touching the screen moves the phone, even when it is propped against something solid. I measured rotations of up to about two degrees this way. You should align the frames before you merge them, or use an app that brackets from a single shutter press.
+Lock the focus as well as the exposure, and then verify that it worked. In one 26-frame bracket of mine only the first frame was sharp, because a tap intended to set the exposure also set the focus. A smudged lens had done the same thing to an earlier burst. Before you leave the scene, zoom into one frame from each end of the bracket and check.
+Keep a capture log that records the device, the app, the settings, the scene and light, what was moving, the frame count, and the file names. One log per experiment is enough, as long as someone else could repeat the capture from it.
+If anything in your scene is moving, say so and show it. In a bracket the color channels clip at different exposures, so each channel ends up averaging a different set of moments and the moving part of the scene comes out a color that was never there. The robust merge handles this for a burst, but it does not handle it for a bracket.
+
+Your reference should be a many-frame average taken on a tripod, which is the same construction you used for the demosaicing reference in Project 2, or a chart placed in the scene. Report the residual noise left in whichever reference you use.
+
+Track B, industrial inspection and metrology
+For this track you detect and measure defects, either on a public industrial dataset or on one you collect yourself. MVTec AD is the standard choice and a printed-circuit-board dataset also works well. You are welcome to photograph your own defects, but you will need enough defective examples to place an uncertainty on a rate, which is more than most people expect.
+
+In your report include the following.
+
+A classical pipeline, built first, using registration, thresholding, morphology, connected components, and region properties. On a well-fixtured dataset this does surprisingly well, and it serves as your baseline.
+A learned anomaly detector. A PatchCore-style feature memory on a pretrained backbone requires no defective training data, which is the situation you would actually face in industry.
+Results for both methods at a chosen operating point, reported with false-positive and false-negative rates. Mark that point on your ROC curve and explain how you chose it.
+Throughput in parts per second or frames per second, at a stated image size and on stated hardware.
+A measurement, not only a classification. Pick a dimension, measure it to sub-pixel precision, and report the repeatability across repeated images of the same part. That repeatability is the uncertainty of your measurement.
+Track C, scientific and medical imaging
+For this track you denoise or deconvolve images from a modality in which clean targets do not exist. Public fluorescence microscopy and retinal OCT datasets both work well. In both cases nobody can give you a noise-free image of the same sample, which is what makes the problem interesting.
+
+In your report include the following.
+
+A self-supervised method. Use Noise2Noise if the dataset gives you two noisy acquisitions of the same field, and Noise2Void if it gives you only one. Exercise 7 is the Noise2Noise half of this, so you already have working code.
+A classical baseline. A tuned non-local means or BM3D is strong on real microscopy, so tune it rather than running it with default parameters.
+Metrics that the modality itself uses, along with a statement of what you compared against. An averaged stack makes a good reference, and a high-exposure acquisition works as long as you say that is what you used. The output of another denoiser is not a reference.
+A specific assessment of hallucination risk. A denoiser that smooths a real punctate structure out of a fluorescence image has destroyed the measurement, even though the image looks better afterward.
+What every track has to do
+A real baseline, meaning a classical method, tuned, on the same data.
+A number at a stated operating point, with an uncertainty, measured against something you name.
+A deployed artifact with a measured speed. If your pipeline has a learned stage, export it to ONNX and run it outside PyTorch with onnxruntime. If your pipeline is entirely classical, which is a reasonable choice in Track A, report the end-to-end time instead and say which stage dominates it. In either case report a mean over repeated runs with a spread, after discarding the first run, at a stated image size and on stated hardware. Reporting CPU alone is fine if that is all you have.
+A failure analysis with example failures. Find the inputs where your system is wrong and show them, using at least three crops.
+One paragraph on fabrication, explaining where your method could invent detail rather than recover it and how you checked whether it did. This comes from lecture 15 and it applies to all three tracks.
+The proposal
+Submit a one-page proposal during the first week of the project. I read these quickly and will reply with either an approval or a specific change. Include the following.
+
+Which track you have chosen, and one sentence describing what you are building.
+Your data, including where it comes from, how much of it you have right now, and what you still need to capture or download.
+The baseline you are comparing against.
+The metric you are using and the operating point you will report at.
+What your deployed artifact is and what it will run on.
+The one thing most likely to sink the project, and what you will do if it does.
+The risk in this project is scope rather than difficulty. You have three weeks and a holiday. A narrow project that is finished and honestly evaluated will earn a better grade than an ambitious one that is 60 percent complete.
